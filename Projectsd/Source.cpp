@@ -3,72 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <ctime>    
-/////////////////////////////////////////////////TASK 1\////////////////////////////
 
-template<class  T>
-class Pair1
-{
-public:
-    Pair1(T _val, T _secVal) : value_first(_val), value_second(_secVal)
-    {
-    }
-
-    const T first() {
-        return value_first;
-    }
-
-    const  T second() {
-        return value_second;
-    }
-
-protected:
-    T value_first;
-    T value_second;
-};
-/////////////////////////////////////////////////TASK 2\////////////////////////////
-template<class  T, class _T>
-class Pair
-{
-public:
-    Pair(T _val, _T _secVal) : value_first(_val), value_second(_secVal)
-    {
-    }
-
-    const T first() const {
-        return value_first;
-    }
-
-    const  _T second() const {
-        return value_second;
-    }
-
-
-
-protected:
-    T value_first;
-    _T value_second;
-};
-
-template<typename U>
-class StringValuePair : public Pair<std::string, U>
-{
-public:
-    StringValuePair(std::string _first, U _second)
-        :Pair<std::string, U>(_first, _second) {}
-};
-
-
-
-
-
-
-
-
-
-
-
-
-///////////////////////////////////////////////TASK 3\////////////////////////////////
 enum Card_suits { // перечисление мастей карты
     SPADES, // ПИКИ 
     CLUBS,  // КРЕСТИ 
@@ -145,6 +80,16 @@ public:
         return C1;
     }
 
+    friend std::ostream& operator<<(std::ostream os, const Card& card) {
+        if (card.position)
+            os << "XX";
+        else
+            os << card.card_suits << ' ' << card.card_denomination << '\n';
+
+    }
+
+
+
 protected:
     Card_suits card_suits;
     Card_denomination card_denomination;
@@ -201,7 +146,7 @@ protected:
     int sum;
 
 };
-class GenericPlayer : Hand
+class GenericPlayer : public Hand
 {
 public:
     GenericPlayer(std::string __name) : name(__name)
@@ -225,19 +170,85 @@ protected:
     std::string name;
     int defeatValue = 21;
 
+    friend std::ostream& operator<<(std::ostream os, const GenericPlayer& genericPlayer) {
+        os << genericPlayer.name << ' ' << genericPlayer.sum << '\n';
+    }
+};
+class Player : public GenericPlayer
+{
+public:
+    virtual bool IsHitting() {
+        std::cout << "do you need one more card" << '\n' << "0 == no, 1 == yes";
+        std::cin >> needCard;
 
+        if (std::cin.fail())
+        {
+            std::cerr << "enter correct answer" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(32767, '\n');
+        }
+        if (needCard)
+            return true;
+        else
+            return false;
+    }
+    void Win()  //мне немного непонятно, но наверное чуть позже функция будет переделана 
+    {
+        if (sum == defeatValue)  std::cout << name << " YOU WIN!";
+    }
+    void Lose() {
+        if (sum > defeatValue) std::cout << name << "YOU LOSE (((";
+    }
+    void Push() {
+        //я понятия не имею как писать ничью, если мы не знаем значения карт у диллера(
+    }
+protected:
+    bool needCard; // 0 нет 1 да  
 };
 
+class House : public GenericPlayer
+{
+public:
+    virtual bool IsHitting()
+    {
+        if (sum < defeatValue) return true;
+        else return false;
+        if (sum <= HouseValue) return true;
+        else return false;
+    }
+    void FlipFirstCard()
+    {
+        std::vector<Card*>::iterator it = cards.begin();
+        for (it; cards.at(1); it++) {
+            (*it)->flip();
+        }
+    }
+
+protected:
+    int HouseValue;
+};
+
+std::ostream& endll(std::ostream& os) { // task 2
+    return std::cout << '\n' << '\n' << std::flush;
+}
+
 int main() {
+    std::cout << 56 << endll << 54 << '\n';
 
-    Pair1<int> p1(6, 9);
-    std::cout << "Pair: " << p1.first() << ' ' << p1.second() << '\n';
+    while (true)
+    {
+        std::cout << "Enter a int value: ";
+        int a;
+        std::cin >> a;
 
-    Pair1<double> p2(3.4, 7.8);
-    std::cout << "Pair: " << p2.first() << ' ' << p2.second() << '\n';
-
-    StringValuePair<int> svp("Amazing", 7);
-    std::cout << "Pair: " << svp.first() << ' ' << svp.second() << '\n';
-
+        if (std::cin.fail())
+        {
+            std::cerr << "enter correct value" << std::endl;
+            std::cin.clear();
+            std::cin.ignore(32767, '\n');
+        }
+        else
+            std::cout << a << std::endl;
+    };
     return 0;
 }
